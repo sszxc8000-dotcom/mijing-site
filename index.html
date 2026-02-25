@@ -7,7 +7,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-```
 <title>附近按摩推薦地圖｜覓境 mijing｜全台按摩芳療店家評價查詢</title>
 <meta name="description" content="覓境是台灣按摩地圖探索平台，整合全台按摩、芳療、SPA推薦店家，依距離與評價排序，快速找附近按摩推薦、查看真實評價，安心預約不踩雷。">
 <meta name="keywords" content="附近按摩, 按摩推薦, 按摩地圖, 芳療推薦, 台北按摩推薦, 台中按摩推薦, 高雄按摩推薦, 按摩評價, SPA推薦, 紓壓按摩, 深層按摩, 精油按摩推薦, 腳底按摩推薦, 養生館推薦, 泰式按摩推薦">
@@ -157,7 +156,10 @@
 }
 </script>
 
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700;900&family=Josefin+Sans:wght@700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Josefin+Sans:wght@700&display=swap">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Josefin+Sans:wght@700&display=swap"></noscript>
 
 <style>
     :root {
@@ -200,7 +202,7 @@
         background-size: 50px 50px;
         pointer-events: none; z-index: 0;
     }
-    .glow-orb { position: fixed; border-radius: 50%; filter: blur(130px); opacity: 0.12; pointer-events: none; z-index: 0; }
+    .glow-orb { position: fixed; border-radius: 50%; filter: blur(130px); opacity: 0.12; pointer-events: none; z-index: 0; will-change: transform; }
     .glow-orb-1 { width: 600px; height: 600px; background: var(--accent-blue); top: -200px; right: -200px; animation: float 20s ease-in-out infinite; }
     .glow-orb-2 { width: 500px; height: 500px; background: var(--accent-purple); bottom: -150px; left: -150px; animation: float 15s ease-in-out infinite reverse; }
     .glow-orb-3 { width: 400px; height: 400px; background: var(--accent-teal); top: 50%; right: -100px; animation: float 25s ease-in-out infinite 5s; }
@@ -265,6 +267,8 @@
     }
     .float-cs-btn:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 12px 36px rgba(91,122,239,0.55); }
     .float-cs-dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; animation: pulse 2s infinite; flex-shrink: 0; }
+    #floatCs { opacity: 1; transition: opacity 0.4s ease; pointer-events: auto; }
+    #floatCs.float-cs-hidden { opacity: 0; pointer-events: none; }
     @media (max-width: 480px) {
         .float-cs { bottom: 18px; right: 14px; }
         .float-cs-btn { padding: 0.8rem 1.2rem; font-size: 0.88rem; }
@@ -604,7 +608,6 @@
         .guide-tab { padding: 0.6rem 1.2rem; font-size: 0.85rem; }
     }
 </style>
-```
 
 </head>
 <body>
@@ -613,7 +616,6 @@
     <div class="glow-orb glow-orb-2"></div>
     <div class="glow-orb glow-orb-3"></div>
 
-```
 <!-- ══ 浮動客服按鈕 ══ -->
 <div class="float-cs" id="floatCs">
     <div class="float-cs-bubble" id="floatBubble">💬 有問題嗎？立即聯絡我們</div>
@@ -883,7 +885,7 @@
 </section>
 
 <!-- ══ 競爭對比表 ══ -->
-
+<section class="compare-section section-alt" id="compare" aria-labelledby="compare-title">
     <div class="container">
         <div class="section-header scroll-reveal">
             <span class="section-badge">🆚 平台比較</span>
@@ -1440,10 +1442,20 @@
 </footer>
 
 <script>
-    // 導覽列滾動
+    // 導覽列 & 浮動按鈕滾動（單一節流監聽）
+    let scrollTicking = false;
+    const navbar = document.querySelector('.navbar');
     window.addEventListener('scroll', () => {
-        document.querySelector('.navbar').classList.toggle('scrolled', window.scrollY > 50);
-    });
+        if (!scrollTicking) {
+            requestAnimationFrame(() => {
+                const sy = window.scrollY;
+                navbar.classList.toggle('scrolled', sy > 50);
+                if (floatCs) floatCs.classList.toggle('float-cs-hidden', sy <= 200);
+                scrollTicking = false;
+            });
+            scrollTicking = true;
+        }
+    }, { passive: true });
 
     // 漢堡選單
     const menuToggle = document.querySelector('.menu-toggle');
@@ -1506,21 +1518,13 @@
         document.getElementById('tab-' + tab).classList.add('active');
     }
 
-    // 浮動客服氣泡：5秒後自動隱藏，滾動超過一定距離後顯示
+    // 浮動客服氣泡：5秒後自動隱藏
     const floatBubble = document.getElementById('floatBubble');
+    const floatCs = document.getElementById('floatCs');
     setTimeout(() => { if (floatBubble) floatBubble.style.display = 'none'; }, 5000);
-    window.addEventListener('scroll', () => {
-        const floatCs = document.getElementById('floatCs');
-        if (!floatCs) return;
-        floatCs.style.opacity = window.scrollY > 200 ? '1' : '0';
-        floatCs.style.pointerEvents = window.scrollY > 200 ? 'auto' : 'none';
-    });
-    // 初始隱藏浮動按鈕，滾動後才顯示
-    document.getElementById('floatCs').style.opacity = '0';
-    document.getElementById('floatCs').style.transition = 'opacity 0.4s ease';
-    document.getElementById('floatCs').style.pointerEvents = 'none';
+    // 初始隱藏浮動按鈕（CSS class 控制，避免 forced reflow）
+    if (floatCs) floatCs.classList.add('float-cs-hidden');
 </script>
-```
 
 </body>
 </html>
